@@ -27,3 +27,4 @@ prob = 0.9
 trials = np.random.rand(20) < prob
 print(trials)
 print("failures despite high confidence", np.sum(trials==False))
+
