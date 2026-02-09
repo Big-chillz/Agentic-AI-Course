@@ -2,7 +2,7 @@ import logging
 import pandas as pd
 
 logging.basicConfig(
-    filename = "test1.log",
+    filename = "test.log",
     level = logging.DEBUG,
     format = "%(asctime)s - %(levelname)s - %(message)s"
 )
