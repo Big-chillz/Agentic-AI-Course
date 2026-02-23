@@ -44,10 +44,18 @@ print("Actual values (Y_test): ", Y_test)
 
 # 6. Evaluate the model
 # confusion matrix is used for classification problems, but since this is a regression problem, we will use mean squared error to evaluate the performance of the model.
+# 
 mse = mean_squared_error(Y_test, Y_pred)
 print("Mean Squared Error: ", mse)
 
 # if mse is high -> the model is not performing well and if mse is low -> the model is performing well.
+
+# overfitting -> when the model performs well on the training data but performs poorly on the testing data. This happens when the model is too complex and captures the noise in the training data instead of the underlying pattern.
+# underfitting -> when the model performs poorly on both the training data and the testing data. This happens when the model is too simple and fails to capture the underlying pattern in the data.
+# if mean squared error is high on the training data and high on the testing data -> underfitting
+# if mean squared error is low on the training data and high on the testing data -> overfitting
+
+
 
 #plot 
 plt.scatter(X, Y, color='blue', label='Data Points')
