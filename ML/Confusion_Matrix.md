@@ -57,10 +57,12 @@ e,p
 f,n
 g,p
 
-TP : actual p - (a,c,e,f) : predicted p - (a,d,e,g) : {a,e} - 2
-FP : actual N - (b,d,g) : predicted p - (a,d,e,g) : {d,g} - 2
-FN : actual P - (a,c,e,f) : predicted n - (b,c,f) : {c,f} - 2
-TN : actual N - (b,d,g) : predicted n - (b,c,f) : {b} - 1
+# use intersection
+
+TP : actual p - (a,c,e,f) : predicted p - (a,d,e,g) -> {a,e} - 2
+FP : actual N - (b,d,g) : predicted p - (a,d,e,g) -> {d,g} - 2
+FN : actual P - (a,c,e,f) : predicted n - (b,c,f) -> {c,f} - 2
+TN : actual N - (b,d,g) : predicted n - (b,c,f) -> {b} - 1
 
 recall = TP / (TP + FN)
 Precision = TP / (TP + FP)
