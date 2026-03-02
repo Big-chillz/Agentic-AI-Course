@@ -31,6 +31,7 @@ Y = np.array([[0],[1],[1],[0]])
 # 2 Activation Function :
 def sigmoid(x) :
   return 1/(1+np.exp(-x))
+
 def sigmoid_derivative(x) :
   return x*(1-x)
 
@@ -52,7 +53,7 @@ learning_rate=0.10
 epochs = 1000
 
 for epoch in range(epochs):
-  hidden_input = np.dot(X,w1) + b1 # prediction = input*slope + coeff
+  hidden_input = np.dot(X,w1) + b1 # prediction = input*slope + coeff prediction = input*weight + bias
   hidden_output = sigmoid(hidden_input)
 
   final_input = np.dot(hidden_output,w2) + b2
@@ -68,8 +69,11 @@ for epoch in range(epochs):
   error_hidden = d_output.dot(w2.T)
   d_hidden = error_hidden*sigmoid_derivative(hidden_output)
 
-  w2 = w2 + hidden_output.T.dot(d_output)*learning_rate
-  b2 = b2 + np.sum(d_hidden,axis = 0,keepdims = True)*learning_rate
+  dw = hidden_output.T.dot(d_output)
+  w2 = w2 + dw*learning_rate
+
+  db = np.sum(d_hidden,axis = 0,keepdims = True)
+  b2 = b2 + db*learning_rate
 
   if epoch%100 == 0:
     print(epoch,loss)
