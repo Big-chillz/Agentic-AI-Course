@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 df = pd.read_csv("D:\\Agentic_Course\\DL\\data.csv")
+df = df.dropna()  # Drop rows with missing values
 
 X = torch.tensor(df[["age","signup_days"]].values, dtype=torch.float32)
 
@@ -35,7 +36,7 @@ optimizer = optim.Adam(model.parameters(), lr=0.01)
 
 losses = []
 
-for epoch in range(500):
+for epoch in range(0,500):
     optimizer.zero_grad()
 
     predictions = model(X)
@@ -51,4 +52,4 @@ plt.plot(losses)
 plt.xlabel("Epochs")
 plt.ylabel("Loss")
 plt.title("Training Loss Over Time")
-plt.show()
+plt.show()  
