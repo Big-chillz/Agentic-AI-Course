@@ -1,3 +1,6 @@
+model 1 : 2 neurons in a single layer
+model 2 : 2 layers and each layer has a single neuron
+
 1 : Narender,sai,bushra
 2 : manju,ushasri
 
