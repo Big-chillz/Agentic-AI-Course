@@ -8,7 +8,8 @@ from langchain_community.vectorstores import FAISS
 from langgraph.graph import StateGraph,END
 from typing import TypedDict
 
-api_key =  "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"
+
+#api_key = "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"
 
 llm = ChatOpenAI(
     model = "openai/gpt-oss-120b:free",
@@ -41,32 +42,48 @@ class GraphState(TypedDict):
     context: list
     answer: str
 
+def router(state: GraphState):
+    print("\n---Router Node")
+    question = state["question"]
+    router_prompt = f"""
+Deceide whether the question requires retriving information from the research paper.
+
+If it requires the paper respond with : 
+retrieve
+
+If it can be answered directly respond with : 
+direct
+
+Question : {question}
+"""
+    decision = llm.invoke(router_prompt).content.lower()
+
+    if "retrieve" in decision :
+        return "retrieve"
+    else :
+        return "direct"
+    
 def retrieve(state: GraphState):
-    print("by retrieve node")
+    print("\n---Retrieve Node")
     question = state["question"]
     docs = retriever.invoke(question)
-    return {"context" : docs}
+    context = "\n\n".join([i.page_content for i in docs])
+    return {"context": context}
 
-def generate(state: GraphState):
-    print("by generate node")
+def generate(state:GraphState):
+    print("\n---Generate Node")
     question = state["question"]
     context = state["context"]
-    formatted_prompt = rag_prompt.format(context = context,question = question)
-    response = llm.invoke(formatted_prompt)
-    return {"answer": response.content}
 
-graph = StateGraph(GraphState)
-graph.add_node("retrieve",retrieve)
-graph.add_node("generate",generate)
+    prompt = rag_prompt.format(
+        context = context,
+        question = question
+    )
+    response = llm.invoke(prompt)
+    return {"answer" : response.content}
 
-graph.set_entry_point("retrieve")
-
-graph.add_edge("retrieve","generate")
-
-graph.add_edge("generate",END)
-
-GG = graph.compile()
-
-user_question = input("ask a question : ")
-result = GG.invoke({"question" : user_question})
-print(result["answer"])
+def direct_answer(state:GraphState):
+    print("\n---Direct Answer Node")
+    question = state["question"]
+    response = llm.invoke(question)
+    return {"answer" : response.content}
