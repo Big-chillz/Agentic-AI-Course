@@ -9,10 +9,10 @@ from langgraph.graph import StateGraph,END
 from typing import TypedDict
 
 
-#api_key = "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"
+
 
 llm = ChatOpenAI(
-    model = "openai/gpt-oss-120b:free",
+    model = "nvidia/nemotron-3-super-120b-a12b:free",
     openai_api_key = api_key,
     openai_api_base = "https://openrouter.ai/api/v1",
 )
@@ -59,9 +59,11 @@ Question : {question}
     decision = llm.invoke(router_prompt).content.lower()
 
     if "retrieve" in decision :
-        return "retrieve"
+        print("going to retrieve node")
+        return "go_to_retrieve_node"
     else :
-        return "direct"
+        print("going to direct node")
+        return "go_to_direct_node"
     
 def retrieve(state: GraphState):
     print("\n---Retrieve Node")
@@ -87,3 +89,35 @@ def direct_answer(state:GraphState):
     question = state["question"]
     response = llm.invoke(question)
     return {"answer" : response.content}
+
+
+CG = StateGraph(GraphState)
+
+CG.add_node("retrieve",retrieve)
+CG.add_node("generate",generate)
+CG.add_node("direct_answer",direct_answer)
+
+CG.set_conditional_entry_point(
+    router,
+    {
+        "go_to_retrieve_node" : "retrieve",
+        "go_to_direct_node" : "direct_answer"
+    }
+)
+
+CG.add_edge("retrieve","generate")
+CG.add_edge("generate",END)
+CG.add_edge("direct_answer",END)
+
+
+Graph = CG.compile()
+
+while True : 
+    user_question = input("\nWhat is your question : ")
+
+    if user_question.lower() == "exit":
+        break
+
+    result = Graph.invoke({"question" : user_question})
+    print("\nfinal answer : ")
+    print(result["answer"])

@@ -1,4 +1,4 @@
-from langchain_openai import ChatOpenAI # helps to connect to the LLM
+from langchain_openai import ChatOpenAI # helps to connect to the LLM - important role as a wrapper around the model
 from langchain_core.prompts import ChatPromptTemplate # helps to create prompts for the LLM
 from langchain_core.output_parsers import StrOutputParser # helps to parse the output from the LLM and get cleaner output
 

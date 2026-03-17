@@ -31,7 +31,7 @@ embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
 vector_db = FAISS.from_documents(docs, embeddings)
 
-retriever = vector_db.as_retriever(search_kwargs={"k": 3})
+retriever = vector_db.as_retriever(search_kwargs={"k": 3}) #k is the number of relevant documents to retrieve from the vector store based on the similarity search. It determines how many chunks of text will be retrieved as context for answering the user's question.
 
 template = """
 You are a Research Assistant. You will be given a question and some context. Use the context to answer the question. If you don't know the answer, say you don't know.
