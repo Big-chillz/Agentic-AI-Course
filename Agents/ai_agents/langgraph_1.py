@@ -8,7 +8,7 @@ from langchain_community.vectorstores import FAISS
 from langgraph.graph import StateGraph,END
 from typing import TypedDict
 
-
+api_key =  "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"
 
 llm = ChatOpenAI(
     model = "openai/gpt-oss-120b:free",
