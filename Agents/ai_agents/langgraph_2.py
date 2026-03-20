@@ -9,7 +9,7 @@ from langgraph.graph import StateGraph,END
 from typing import TypedDict
 
 
-
+api_key = "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"
 
 llm = ChatOpenAI(
     model = "nvidia/nemotron-3-super-120b-a12b:free",
