@@ -30,7 +30,7 @@ from typing import TypedDict, List
 
 # llm initiation or setup
 
-api_key = "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"
+api_key = "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"
 llm = ChatOpenAI(
     model = "nvidia/nemotron-3-super-120b-a12b:free",
     openai_api_key = api_key,
