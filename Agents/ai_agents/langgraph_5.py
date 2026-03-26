@@ -139,6 +139,84 @@ Return a precise and factual result
 """
     response = llm.invoke(prompt)
 
-    response {
+    return {
         "last_step_output" : response.content
     }        
+
+def judge(state : GraphState) :
+    print("In Judge Node")
+
+    if state["current_step"] >= len(state["plan"]):
+        return {"decision" : "good"}
+    
+    step = state["plan"][state["current_step"]]
+    output = state.get("last_step_output","")
+
+
+    prompt = f"""
+Evaluate this output based on the step
+Step : 
+{step}
+
+Output : 
+{output}
+
+Responde only: good or bad
+"""
+    try :
+        decision_raw = llm.invoke(prompt).content.lower().strip()
+    except : 
+        decision_raw = "bad"
+
+    decision = ""
+
+    if  "good" in decision_raw :
+        decision = "good"
+    else : 
+        decision = "bad"
+
+    if state["current_step"] + 1 >= len(state["plan"]) : 
+        return{
+            "step_outputs" : state["step_outputs"] + [output],
+            "current_step" : len(state["plan"]),
+            "retry_count" : 0,
+            "decision" : "good"
+        }
+    if decision == "good" :
+        return {
+            "step_outputs" : state["step_outputs"] + [output],
+            "current_stop" : state["current_step"] + 1,
+            "retry_count" : 0,
+            "decision" : "good"
+        }
+    return{
+        "retry_count" : state["retry_count"]+1,
+        "decision" : "bad"
+    }
+
+def replan_step(state: GraphState):
+    print("in replan step")
+    if state["current_step"] >= len(state["plan"]):
+        return {}
+    
+    failed_step = state["plan"][state["current_step"]]
+
+    prompt = f"""
+The following step has failed : 
+{failed_step}
+
+Rewrite this step better.
+
+Return ONLY ONE improved step.
+"""
+    new_step = llm.invoke(prompt).content.strip()
+
+    new_plan = state["plan"]
+    new_plan[state["current_step"]] = new_step
+
+    return {
+        "plan" : new_plan,
+        "retry_count" : 0
+    }
+
+
