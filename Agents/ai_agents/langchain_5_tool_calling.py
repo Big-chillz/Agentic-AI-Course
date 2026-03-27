@@ -40,7 +40,7 @@ def calculator(query : str) -> int:
     return result
 
 tools = [paper_search, calculator]
-agent = initialize_agent(
+agent = invoke(
     tools,
     llm,
     agent = AgentType.ZERO_SHOT_REACT_DESCRIPTION,

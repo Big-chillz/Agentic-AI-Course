@@ -1,3 +1,4 @@
+# code 2
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -12,7 +13,7 @@ from typing import TypedDict, List
 
 # llm initiation or setup
 
-api_key = "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"
+api_key = "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"
 llm = ChatOpenAI(
     model = "nvidia/nemotron-3-super-120b-a12b:free",
     openai_api_key = api_key,
@@ -51,8 +52,8 @@ memory_db = Chroma(
 class GraphState(TypedDict) : 
     question : str
     plan : List[str]
-    curent_step = int
-    step_output : List[str]
+    current_step : int
+    step_outputs : List[str]
     last_step_output : str
     context : str
     chat_history : List[str]
@@ -80,7 +81,7 @@ Task :
         "plan" : steps,
         "current_step" : 0,
         "step_outputs" : [],
-        "retry_counts": 0,
+        "retry_count": 0,
         "max_steps" : 5
     }
 
@@ -99,11 +100,11 @@ def retrieve(state: GraphState):
     if state["current_step"] >= len(state["plan"]):
         return {"context":""}
     
-    print(f"\n--- Retrieve (step {state["current_step"]+1})")
+    print(f"\n--- Retrieve (step {state['current_step']+1})")
 
     step = state["plan"][state["current_step"]]
 
-    paper_docs = retrieve.invoke(step)
+    paper_docs = retriever.invoke(step)
     paper_context = "\n".join([d.page_content for d in paper_docs])
 
     memory_docs = memory_db.similarity_search(step, k=2)
@@ -118,13 +119,13 @@ def executor(state:GraphState):
     if state["current_step"] >= len(state["plan"]):
         return {"last_step_output" : "No more Steps"}
     
-    print(f"\n - execute step {state["current_step"]+1}")
+    print(f"\n - execute step {state['current_step']+1}")
 
     step = state["plan"][state["current_step"]]
     context = state.get("context","")
 
     if not context.strip(): #context.strip() ==  None
-        return {"last_Step_outputs" : "NO relevant context found"}
+        return {"last_step_output" : "NO relevant context found"}
     
     prompt = f"""
 Execute this step using the provided context. 
@@ -185,7 +186,7 @@ Responde only: good or bad
     if decision == "good" :
         return {
             "step_outputs" : state["step_outputs"] + [output],
-            "current_stop" : state["current_step"] + 1,
+            "current_step" : state["current_step"] + 1,
             "retry_count" : 0,
             "decision" : "good"
         }
@@ -220,3 +221,120 @@ Return ONLY ONE improved step.
     }
 
 
+def after_judge(state: GraphState):
+
+    decision = state.get("decision","bad")
+
+    if state["current_step"] >= len(state.get("plan",[])) : 
+        return "end"
+    
+    if decision == "good" : 
+        return "next"
+    
+    if state.get("retry_count",0) < 2 : 
+        return "retry"
+    
+    if state.get("retry,count") > 2 :
+        return "replan"
+    
+    return "force_next"
+
+def force_next(state: GraphState):
+    print("In Force next Node")
+
+    output = state.get("last_step_output", "Step Failed, moving forward")
+
+    return {
+        "step_outputs" : state["step_outputs"]+[output],
+        "current_step" : state["current_step"]+1,
+        "retry_count" : 0
+    }
+
+
+def final_answer(state: GraphState):
+    print("Final Answer Node")
+    outputs = "\n".join(state["step_outputs"])
+
+    prompt = f"""
+Question :
+{state['question']}
+
+Step Outputs : 
+{outputs}
+
+Generate a fina, well structured answer. 
+"""
+    response = llm.invoke(prompt)
+    answer = response.content
+
+    memory_db.add_texts([
+        f"Q : {state['question']} \n A: {answer}"
+    ])
+
+    history = state.get("chat_history",[]) + [
+        f"User : {state['question']}",
+        f"Assistant : {answer}"
+    ]
+
+    return {
+        "answer" : answer,
+        "chat_history" : history
+    }
+
+graph = StateGraph(GraphState)
+
+graph.add_node("planner",planner)
+graph.add_node("retrieve",retrieve)
+graph.add_node("executor",executor)
+graph.add_node("judge",judge)
+graph.add_node("replan",replan_step)
+graph.add_node("final",final_answer)
+graph.add_node("force_next",force_next)
+
+graph.set_entry_point("planner")
+
+graph.add_conditional_edges(
+    "planner",
+    check_status,
+    {
+        "continue" : "retrieve",
+        "done" : "final"
+    }
+)
+
+graph.add_edge("retrieve","executor")
+graph.add_edge("executor","judge")
+graph.add_conditional_edges(
+    "judge",
+    after_judge,
+    {
+        "next" : "retrieve",
+        "force_next" : "force_next",
+        "retry" : "executor",
+        "end" : "final",
+        "replan" : "replan"
+    }
+)    
+
+graph.add_edge("replan","retrieve")
+graph.add_edge("final",END)
+
+app = graph.compile()
+
+state = {
+    "chat_history" : []
+}
+
+while True : 
+    user_question = input("\n Ask Question (type : 'exit' to quit): ")
+    if user_question.lower() == "exit":
+        break
+
+    result = app.invoke({
+        "question" : user_question,
+        "chat_history" : state["chat_history"]
+    })
+
+    print("\n Final Answer : \n")
+    print(result["answer"])
+    state["chat_history"] = result["chat_history"]

@@ -1,3 +1,4 @@
+#code 2
 """
 User Input
    ↓
@@ -80,7 +81,7 @@ def planner(state: GraphState):
     print ("IN planner node")
     question = state["question"]
     prompt = f"""
-Break the following task into a clear, ordered list of steps.ChatPromptTemplate
+Break the following task into a clear, ordered list of steps.
 
 Return ONLY a numbered list. 
 
@@ -99,20 +100,20 @@ Task :
     return {
         "plan" : steps,
         "current_step" : 0,
-        "step_output": []
+        "step_outputs": []
     }
 
 
 def retrieve(state: GraphState):
     print("IN retrieve node")
 
-    step = state["plan"][state["current_step"]]
+    step = state["plan"][state["current_steps"]]
 
     paper_docs = retriever.invoke(step)
     paper_context = "\n".join([d.page_content for d in paper_docs])
 
     memory_docs = memory_db.similarity_search(step, k=2)
-    memory_context = "\n".join([d.memory_content for d in memory_docs])
+    memory_context = "\n".join([d.page_content for d in memory_docs])
 
     combined_context = f"""
 -- Paper Context --
@@ -126,7 +127,7 @@ def retrieve(state: GraphState):
 
 def executor(state : GraphState):
     print("IN executor node\n")
-    print(f"--State {state["current_step"]+1}--")
+    print(f"--State {state['current_step']+1}--")
     step = state["plan"][state["current_step"]]
     context = state.get("context","")
     history = state.get("chat_history",[])
@@ -154,7 +155,7 @@ Give a clear and concise result for THIS step only.
 
     return {
         "step_outputs" : updated_outputs,
-        "current_step" : state["current_steps"]+1
+        "current_step" : state["current_step"]+1
     }
 
 def should_continue(state: GraphState):
