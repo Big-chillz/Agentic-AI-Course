@@ -12,13 +12,13 @@ api_key = "sk-or-v1-d8b9ddcb903a177c112dd7b3446ee5cfea131fb5116aad32b7c5652bf527
 
 llm = ChatOpenAI(
     model = "openai/gpt-oss-120b:free",
-    openai_api_key = api_key,
+    openai_api_key = "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",
     openai_api_base = "https://openrouter.ai/api/v1",
 )
 
 output_parser = StrOutputParser()
 
-doc = PyPDFLoader(r"D:\Agentic_Course\Agents\ai_agents\2603.09858v1.pdf").load()
+doc = PyPDFLoader(r"D:\My_tests\Agents\ai_agents\2603.09858v1.pdf").load()
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
 docs = text_splitter.split_documents(doc)
