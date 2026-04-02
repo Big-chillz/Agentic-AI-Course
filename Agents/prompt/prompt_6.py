@@ -1,16 +1,5 @@
-# temperature = creativity
-# top_p = probability or diversity or sticking to rules or determinisitcity
-# top_k = max limit of token, most important tokens
-# max_tokens = the limit of tokens
-# seed = to fix a virtual state of probability
-# logit_bias = classify or favor categories based on likeliness - logit_bias = {"non-plastic":3,"plastic" : -1.5}
-# presence_frequency = higher - more exploration
-# frequency_penalty = higher - probability of repition is low
-# n - how many outputs
-
-
-# top_p = 0.4 - more conservative more focuse
-# top_p = 0.2 - select most likely those tokens which probability of 20%
+# top_k = focused domain but varied selection of tokens in terms of probability
+# top_k = 10 -> much focused ; top_k = 50 -> moderate ; top_k = 100+ -> negligable focus or randomness
 from langchain_openai import ChatOpenAI # helps to connect to the LLM - important role as a wrapper around the model
 from langchain_core.prompts import ChatPromptTemplate # helps to create prompts for the LLM
 from langchain_core.output_parsers import StrOutputParser # helps to parse the output from the LLM and get cleaner output
@@ -21,7 +10,7 @@ llm = ChatOpenAI(
     model = "nvidia/nemotron-3-super-120b-a12b:free",
     openai_api_key = api_key,
     openai_api_base = "https://openrouter.ai/api/v1",
-    top_p = 0.9,
+    top_k = 0.3,
 )
 
 prompt = ChatPromptTemplate.from_messages([
@@ -36,6 +25,6 @@ city_by_user = "Delhi"
 result = chain.invoke({"city": city_by_user})
 print(result)
 
-with open("top_p_0.9_prompt_4.txt","a",encoding = "utf-8") as f:
+with open("top_k_0.3_prompt_4.txt","a",encoding = "utf-8") as f:
     f.write(result)
 
