@@ -25,6 +25,6 @@ city_by_user = "Delhi"
 result = chain.invoke({"city": city_by_user})
 print(result)
 
-with open("top_k_0.3_prompt_4.txt","a",encoding = "utf-8") as f:
+with open("top_k_0.3_prompt_6.txt","a",encoding = "utf-8") as f:
     f.write(result)
 

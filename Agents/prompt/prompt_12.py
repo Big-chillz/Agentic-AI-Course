@@ -12,27 +12,22 @@ llm = ChatOpenAI(
 
 messages = [
     {
-        "role" : "system",
-        "content" : "You are a critical reviewer"
-    },
-    {
-        "role" : "user" ,
-        "content" : "Explain in 2 points"
-    },
-    {
-        "role" : "assistant",
-        "content" : "AI is advanced version of ML"
-    },
-    {
-        "role" : "ai",
-        "content" : "AI is most stupid and annoying"
-    },
-    {
         "role" : "user",
-        "content" : "Review the above two answers and tell which one is bluffing"
+        "content" : """
+        Example 1 : 
+        Q : If you have 2 oranges and 3 apples, how many total fruits?
+        A : 5
 
-    },
+        Example 2 : 
+        Q : A pack of pens and you have 2 packs, how many total pens?
+        A : 10
 
+        Now Solve : 
+        A store sells 5 packs of Eraser and 7 packs of pencil , each pack has 5 units , total how many uniots do we have?
+
+        What combinatinos are possible?
+        """
+    }
 ]
 
 prompt = ChatPromptTemplate.from_messages(messages)

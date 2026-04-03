@@ -9,30 +9,24 @@ llm = ChatOpenAI(
     openai_api_base = "https://openrouter.ai/api/v1",
 )
 
-
 messages = [
     {
-        "role" : "system",
-        "content" : "You are a critical reviewer"
-    },
-    {
-        "role" : "user" ,
-        "content" : "Explain in 2 points"
-    },
-    {
-        "role" : "assistant",
-        "content" : "AI is advanced version of ML"
-    },
-    {
-        "role" : "ai",
-        "content" : "AI is most stupid and annoying"
-    },
-    {
         "role" : "user",
-        "content" : "Review the above two answers and tell which one is bluffing"
+        "content" : """
+        Example : 
+        Q : 2 pack of pencils, 3 pack of erasers, and each pack has 5 units , total how many units?
+        A : Respond in json only
+            "number_of_units_in_a_packs" : 5,
+            "pack_of_pencils" : 2,
+            "pack_of_erasers" : 3,
+            "total_units" : 25
+            
 
-    },
+            A store sells 8 packs of seeds and 4 packs of fruits , each pack has 11 units , total how many units do we have?
 
+            RESPOND IN JSON FORMAT ONLY
+        """
+    }
 ]
 
 prompt = ChatPromptTemplate.from_messages(messages)
